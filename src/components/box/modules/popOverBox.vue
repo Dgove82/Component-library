@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, onUnmounted, ref} from "vue"
+import {onMounted, onUnmounted, ref, watch} from "vue"
 import {tool} from '@/utils'
 
 const props = defineProps({
@@ -19,9 +19,17 @@ const props = defineProps({
     type: String,
     default: "upon"
   },
-  color: {
+  theme: {
     type: String,
-    default: "#fff"
+    default: 'light'
+  },
+  backColor: {
+    type: String,
+    default: null
+  },
+  borderColor: {
+    type: String,
+    default: null
   },
   showArrow: {
     type: String,
@@ -56,6 +64,9 @@ class Popover {
     this.popBoxRect = null
     this.arrowRect = null
 
+    this.appearRateCtrl = new tool.RateCtrl()
+    this.disappearRateCtrl = new tool.RateCtrl()
+
     this.init()
   }
 
@@ -63,12 +74,34 @@ class Popover {
   init() {
     // 设置状态
     this.setState(thisPop.value.active)
-    // 设置宽度
-    tool.css(this.popBox, 'width', props.width)
+    // 设置样式
+    this.initStyle()
     // 添加监听事件
     this.addEvent()
     // 添加
     this.adjust()
+
+    // 偏移
+    this.disappearState()
+  }
+
+  initStyle = () => {
+    tool.cssDom(this.popBox, 'width', props.width)
+    if (props.backColor !== null) {
+      tool.cssDom(this.popBox, '--background-color', props.backColor)
+      tool.cssDom(this.popBox, '--font-color', 'var(--dark-color)')
+    } else if (props.theme === 'light') {
+      tool.cssDom(this.popBox, '--background-color', 'var(--light-color)')
+      tool.cssDom(this.popBox, '--font-color', 'var(--dark-color)')
+    } else if (props.theme === 'dark') {
+      console.log('?')
+      tool.cssDom(this.popBox, '--background-color', 'var(--dark-color)')
+      tool.cssDom(this.popBox, '--font-color', 'var(--light-color)')
+    }
+    if (props.borderColor !== null) tool.cssDom(this.popBox, '--border-color', props.borderColor)
+    else if (props.theme === 'light') tool.cssDom(this.popBox, '--border-color', 'var(--dark-color)')
+    else if (props.theme === 'dark') tool.cssDom(this.popBox, '--border-color', 'var(--light-color)')
+
   }
 
   rectUpdate = () => {
@@ -77,15 +110,19 @@ class Popover {
     this.popBoxRect = tool.getDomRect(this.popBox)
     this.arrowRect = tool.getDomRect(this.arrow)
 
-    if (this.originPopWidth === null) this.originPopWidth = this.popBoxRect.width
+    if (this.originPopWidth === null) {
+      this.originPopWidth = this.popBoxRect.width
+      // 隐藏
+      tool.cssDom(this.popBox, 'display', 'block')
+    }
 
     const viewWidth = window.innerWidth - this.scrollBar
 
     if (this.originPopWidth > viewWidth) {
       this.popBoxRect.width = viewWidth
-      tool.css(this.popBox, 'width', `${viewWidth}px`)
+      tool.cssDom(this.popBox, 'width', `${viewWidth}px`)
     } else {
-      tool.css(this.popBox, 'width', `${this.originPopWidth}px`)
+      tool.cssDom(this.popBox, 'width', `${this.originPopWidth}px`)
       this.popBoxRect.width = this.originPopWidth
     }
   }
@@ -123,96 +160,104 @@ class Popover {
 
   setArrowDown = () => {
     this.distance.topA = 0
-    tool.css(this.arrow, 'top', `${-this.distance.topA}px`)
+    tool.cssDom(this.arrow, 'top', `${-this.distance.topA}px`)
 
     this.distance.leftA = this.distance.leftP + (this.controllerRect.width - this.arrowRect.width) / 2
-    tool.css(this.arrow, 'left', `${this.distance.leftA}px`)
+    tool.cssDom(this.arrow, 'left', `${this.distance.leftA}px`)
 
-    tool.css(this.arrow, 'border-bottom-color', 'transparent')
-    tool.css(this.arrow, 'border-right-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-top-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-left-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-bottom-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-right-color', 'transparent')
   }
 
   setDown = () => {
     this.distance.topP = this.controllerRect.height + this.gap
-    tool.css(this.popBox, 'top', `${this.distance.topP}px`)
+    tool.cssDom(this.popBox, 'top', `${this.distance.topP}px`)
 
     this.distance.leftP = (this.popBoxRect.width - this.controllerRect.width) / 2
 
     this.fineTuning()
 
-    tool.css(this.popBox, 'left', `${-this.distance.leftP}px`)
+    tool.cssDom(this.popBox, 'left', `${-this.distance.leftP}px`)
 
     if (this.showArrow === 'true') this.setArrowDown()
   }
 
   setArrowUpon = () => {
     this.distance.topA = this.popBoxRect.height - this.arrowRect.height
-    tool.css(this.arrow, 'top', `${this.distance.topA}px`)
+    tool.cssDom(this.arrow, 'top', `${this.distance.topA}px`)
 
     this.distance.leftA = this.distance.leftP + (this.controllerRect.width - this.arrowRect.width) / 2
-    tool.css(this.arrow, 'left', `${this.distance.leftA}px`)
+    tool.cssDom(this.arrow, 'left', `${this.distance.leftA}px`)
 
-    tool.css(this.arrow, 'border-left-color', 'transparent')
-    tool.css(this.arrow, 'border-top-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-right-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-bottom-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-left-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-top-color', 'transparent')
   }
 
   setUpon = () => {
     this.distance.topP = this.popBoxRect.height + this.gap
-    tool.css(this.popBox, 'top', `${-this.distance.topP}px`)
+    tool.cssDom(this.popBox, 'top', `${-this.distance.topP}px`)
 
     this.distance.leftP = (this.popBoxRect.width - this.controllerRect.width) / 2
 
     this.fineTuning()
 
-    tool.css(this.popBox, 'left', `${-this.distance.leftP}px`)
+    tool.cssDom(this.popBox, 'left', `${-this.distance.leftP}px`)
 
     if (this.showArrow === 'true') this.setArrowUpon()
   }
 
   setArrowLeft = () => {
     this.distance.topA = this.distance.topP + (this.controllerRect.height - this.arrowRect.height) / 2
-    tool.css(this.arrow, 'top', `${this.distance.topA}px`)
+    tool.cssDom(this.arrow, 'top', `${this.distance.topA}px`)
 
     this.distance.leftA = this.popBoxRect.width - this.arrowRect.width
-    tool.css(this.arrow, 'left', `${this.distance.leftA}px`)
+    tool.cssDom(this.arrow, 'left', `${this.distance.leftA}px`)
 
-    tool.css(this.arrow, 'border-left-color', 'transparent')
-    tool.css(this.arrow, 'border-bottom-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-right-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-top-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-left-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-bottom-color', 'transparent')
   }
 
   setLeft = () => {
     this.distance.leftP = this.popBoxRect.width + this.gap
-    tool.css(this.popBox, 'left', `${-this.distance.leftP}px`)
+    tool.cssDom(this.popBox, 'left', `${-this.distance.leftP}px`)
 
     this.distance.topP = (this.popBoxRect.height - this.controllerRect.height) / 2
 
     this.fineTuning()
 
-    tool.css(this.popBox, 'top', `${-this.distance.topP}px`)
+    tool.cssDom(this.popBox, 'top', `${-this.distance.topP}px`)
 
     if (this.showArrow === 'true') this.setArrowLeft()
   }
 
   setArrowRight = () => {
     this.distance.leftA = 0
-    tool.css(this.arrow, 'left', `${this.distance.leftA}px`)
+    tool.cssDom(this.arrow, 'left', `${this.distance.leftA}px`)
 
     this.distance.topA = this.distance.topP + (this.controllerRect.height - this.arrowRect.height) / 2
-    tool.css(this.arrow, 'top', `${this.distance.topA}px`)
+    tool.cssDom(this.arrow, 'top', `${this.distance.topA}px`)
 
-    tool.css(this.arrow, 'border-right-color', 'transparent')
-    tool.css(this.arrow, 'border-top-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-left-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-bottom-color', 'var(--border-color)')
+    tool.cssDom(this.arrow, 'border-right-color', 'transparent')
+    tool.cssDom(this.arrow, 'border-top-color', 'transparent')
   }
 
   setRight = () => {
     this.distance.leftP = this.controllerRect.width + this.gap
-    tool.css(this.popBox, 'left', `${this.distance.leftP}px`)
+    tool.cssDom(this.popBox, 'left', `${this.distance.leftP}px`)
 
     this.distance.topP = (this.popBoxRect.height - this.controllerRect.height) / 2
 
     this.fineTuning()
 
-    tool.css(this.popBox, 'top', `${-this.distance.topP}px`)
+    tool.cssDom(this.popBox, 'top', `${-this.distance.topP}px`)
 
     if (this.showArrow === 'true') this.setArrowRight()
 
@@ -228,23 +273,31 @@ class Popover {
         else this.distance.direction = 'upon'
         break
       case 'down':
-        if (window.innerHeight - this.controllerRect.bottom < height) this.distance.direction = 'upon'
+        if ((window.innerHeight - this.controllerRect.bottom < height)
+            && (height < window.innerHeight - this.controllerRect.top)) this.distance.direction = 'upon'
         else this.distance.direction = 'down'
         break
       case 'left':
-        if (this.controllerRect.left < width) this.distance.direction = 'right'
-        else this.distance.direction = 'left'
+        if (this.controllerRect.left < width
+            && width < window.innerWidth - this.controllerRect.right - this.scrollBar) this.distance.direction = 'right'
+        else if (this.controllerRect.left >= width) this.distance.direction = 'left'
+        else this.distance.direction = 'down'
         break
       case 'right':
-        if (window.innerWidth - this.controllerRect.right - this.scrollBar < width) this.distance.direction = 'left'
-        else this.distance.direction = 'right'
+        if (width > window.innerWidth - this.controllerRect.right - this.scrollBar
+            && width < this.controllerRect.left) this.distance.direction = 'left'
+        else if (width <= window.innerWidth - this.controllerRect.right - this.scrollBar) this.distance.direction = 'right'
+        else this.distance.direction = 'down'
         break
     }
   }
 
   adjust = () => {
+    tool.cssDom(this.popBox, 'display', 'block')
+
     this.rectUpdate()
     this.chooseDirection()
+
 
     switch (this.distance.direction) {
       case 'upon':
@@ -260,6 +313,8 @@ class Popover {
         this.setRight()
         break
     }
+
+    if (!thisPop.value.active) tool.cssDom(this.popBox, 'display', 'none')
   }
 
   setState = (state) => thisPop.value.active = state
@@ -295,6 +350,7 @@ class Popover {
 
       const close = () => {
         if (!(exist.popBox || exist.trigger)) {
+          this.removeAnimation()
           this.setState(false)
           removeListener()
           window.removeEventListener("click", close)
@@ -304,10 +360,12 @@ class Popover {
       this.toggleState()
 
       if (thisPop.value.active) {
+        this.addAnimation()
         exist.trigger = true
         addListener()
         window.addEventListener('click', close)
       } else {
+        this.removeAnimation()
         removeListener()
         window.removeEventListener("click", close)
       }
@@ -359,8 +417,67 @@ class Popover {
         break
     }
   }
+
+  appearState = () => {
+    tool.cssDom(this.popBox, 'opacity', 1)
+    switch (this.distance.direction) {
+      case 'upon':
+        tool.cssDom(this.popBox, 'transform', 'translateY(0)')
+        break
+      case 'down':
+        tool.cssDom(this.popBox, 'transform', 'translateY(0)')
+        break
+      case 'right':
+        tool.cssDom(this.popBox, 'transform', 'translateX(0)')
+        break
+      case 'left':
+        tool.cssDom(this.popBox, 'transform', 'translateX(0)')
+        break
+    }
+  }
+
+  addAnimation = () => {
+    tool.cssDom(this.popBox, 'display', 'block')
+    this.appearRateCtrl.debounce(() => {
+      this.appearState()
+    }, 10)
+  }
+
+  disappearState = () => {
+    tool.cssDom(this.popBox, 'opacity', 0)
+    switch (this.distance.direction) {
+      case 'upon':
+        tool.cssDom(this.popBox, 'transform', 'translateY(-100px)')
+        break
+      case 'down':
+        tool.cssDom(this.popBox, 'transform', 'translateY(100px)')
+        break
+      case 'right':
+        tool.cssDom(this.popBox, 'transform', 'translateX(100px)')
+        break
+      case 'left':
+        tool.cssDom(this.popBox, 'transform', 'translateX(-100px)')
+        break
+    }
+  }
+
+  removeAnimation = () => {
+    this.disappearState()
+    this.disappearRateCtrl.debounce(() => {
+      if (!thisPop.value.active) tool.cssDom(this.popBox, 'display', 'none')
+    }, 200)
+  }
 }
 
+const createPopOver = () => {
+  return new Popover({direction: props.direction, showArrow: props.showArrow})
+}
+
+watch(() => props, () => {
+  popover = createPopOver()
+}, {
+  deep: true,
+})
 
 const rateCtrl = new tool.RateCtrl()
 
@@ -371,7 +488,7 @@ const resizeView = () => {
 }
 
 onMounted(() => {
-  popover = new Popover({direction: props.direction, showArrow: props.showArrow})
+  popover = createPopOver()
 
   window.addEventListener('resize', resizeView)
   window.addEventListener('scroll', resizeView)
@@ -382,6 +499,11 @@ onUnmounted(() => {
   window.removeEventListener('scroll', resizeView)
 })
 
+defineExpose({
+  getState: () => {
+    return thisPop.value.active
+  },
+})
 
 </script>
 
@@ -394,11 +516,11 @@ onUnmounted(() => {
         </slot>
       </div>
     </div>
-    <div :class="{popBox:true, hide: !thisPop.active}"
+    <div :class="{popBox:true}"
          ref="popBox"
     >
       <div class="pop"
-           :style="{backgroundColor: color}"
+           ref="pop"
       >
         <slot name="content">
           内容
@@ -406,7 +528,6 @@ onUnmounted(() => {
       </div>
       <span :class="{arrow: true, noArrow: showArrow === 'false'}"
             ref="arrow"
-            :style="{backgroundColor: color}"
       ></span>
     </div>
   </div>
@@ -415,6 +536,7 @@ onUnmounted(() => {
 <style scoped>
 .popover {
   position: relative;
+  width: fit-content;
 }
 
 .triggerBox {
@@ -431,36 +553,37 @@ onUnmounted(() => {
   height: fit-content;
   width: fit-content;
   position: absolute;
-  z-index: var(--over-highest);
   left: 0;
   top: 0;
   border: 2px solid transparent;
   padding: 5px;
-  opacity: 1;
-}
-
-.hide {
-  opacity: 0;
+  display: block;
+  animation: none;
+  transition: all 0.2s;
+  --dark-color: #303133;
+  --light-color: white;
+  --border-color: var(--dark-color);
+  --font-color: var(--dark-color);
+  --background-color: var(--light-color);
 }
 
 .popBox .pop {
   height: fit-content;
   width: 100%;
   overflow: hidden;
-  background-color: white;
   position: relative;
   border-radius: 4px;
-  border: 1px solid var(--border-color-first-level);
   top: 0;
   left: 0;
   padding: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  color: var(--font-color);
 }
 
 .popBox .arrow {
-  background-color: #fff;
   display: inline-block;
   box-sizing: border-box;
-  border: 1px solid var(--border-color-first-level);
   border-top-left-radius: 2px;
   height: 10px;
   width: 10px;
@@ -468,11 +591,12 @@ onUnmounted(() => {
   position: absolute;
   top: 0;
   left: 0;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  color: var(--font-color);
 }
 
 .popBox .noArrow {
   display: none;
 }
-
-
 </style>
