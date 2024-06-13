@@ -1,8 +1,12 @@
 <script setup>
 import {WeatherSnow} from "@/components/icon/index.js";
-import {IconBox, PopOverBox, VariableBox} from "@/components/box/index.js";
+import {IconBox, LoadBox, PopOverBox, VariableBox} from "@/components/box/index.js";
 import {NormalButton} from "@/components/button/index.js";
+import {onMounted, ref} from "vue";
+import ImageBox from "@/components/box/modules/imageBox.vue";
 
+
+const popover = ref(null)
 
 const props = defineProps({
   t_id: {
@@ -10,7 +14,6 @@ const props = defineProps({
     required: true,
   }
 })
-
 
 
 </script>
@@ -30,7 +33,7 @@ const props = defineProps({
       图标
     </div>
     <div class="sBox">
-      <IconBox>
+      <IconBox listen="true">
         <WeatherSnow></WeatherSnow>
       </IconBox>
     </div>
@@ -48,12 +51,11 @@ const props = defineProps({
       提示框
     </div>
     <div class="sBox">
-      <div style="height: 500px;"></div>
       <div class="box"
-           style="width: 90px; margin: 50px auto; position: relative; right: -500px;">
-        <pop-over-box width="2000px" trigger="hover" direction="upon" color="white" >
+           style="width: 90px; margin: 50px auto; position: relative;">
+        <pop-over-box width="100px" trigger="click" direction="upon" theme="light" ref="popover">
           <template #trigger>
-            <button>上</button>
+            <button style="width: 100px;">上</button>
           </template>
           <template #content>
             内容
@@ -61,10 +63,10 @@ const props = defineProps({
         </pop-over-box>
       </div>
       <div class="box"
-           style="width: 90px; margin: 50px auto; position: relative; left: -500px;">
-        <pop-over-box width="100px" trigger="click" direction="left" color="white">
+           style="width: 90px; margin: 50px auto; position: relative; left: -100px">
+        <pop-over-box width="100px" trigger="click" direction="left" back-color="red">
           <template #trigger>
-            <button>左</button>
+            <button style="width: 100px;">左</button>
           </template>
           <template #content>
             内容
@@ -72,10 +74,10 @@ const props = defineProps({
         </pop-over-box>
       </div>
       <div class="box"
-           style="width: 90px; margin: 50px auto; position: relative; right: -500px">
-        <pop-over-box width="100px" trigger="click" direction="right" color="white">
+           style="width: 90px; margin: 50px auto; position: relative; right: -100px; top: -75px">
+        <pop-over-box width="100px" trigger="click" direction="right">
           <template #trigger>
-            <button>右</button>
+            <button style="width: 100px;">右</button>
           </template>
           <template #content>
             内容
@@ -83,17 +85,28 @@ const props = defineProps({
         </pop-over-box>
       </div>
       <div class="box"
-           style="width: 90px; margin: 50px auto; position: relative;  right: -500px;">
-        <pop-over-box width="100px" trigger="click" direction="down" color="white">
+           style="width: 90px; margin: 50px auto; position: relative; top: -75px">
+        <pop-over-box width="100px" trigger="click" direction="down">
           <template #trigger>
-            <button>下</button>
+            <button style="width: 100px;">下</button>
           </template>
           <template #content>
             内容
           </template>
         </pop-over-box>
       </div>
-      <div style="height: 1000px;"></div>
+    </div>
+  </div>
+  <div v-if="t_id === 4">
+    <div class="title">图片展示</div>
+    <div class="sBox">
+      <image-box></image-box>
+    </div>
+  </div>
+  <div v-if="t_id === 5">
+    <div class="title">加载盒展示</div>
+    <div class="sBox">
+      <load-box ref="load" listen="true"></load-box>
     </div>
   </div>
 </template>
@@ -106,6 +119,7 @@ const props = defineProps({
 }
 
 .sBox {
+  color: red;
   position: relative;
   width: 300px;
   height: 300px;
