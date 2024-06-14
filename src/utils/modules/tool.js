@@ -14,7 +14,7 @@ const getDomRect = dom => {
 }
 
 const getRect = obj => {
-    if (obj instanceof HTMLElement) {
+    if (obj instanceof Element) {
         getDomRect(obj)
     } else if (obj.__v_isRef === true) {
         getRefRect(obj)
@@ -34,13 +34,20 @@ const cssDom = (dom, prop, val) => {
 }
 
 const css = (obj, prop, val) => {
-    if (obj instanceof HTMLElement) {
+    if (obj instanceof Element) {
         cssDom(obj, prop, val)
     } else if (obj.__v_isRef === true) {
         cssRef(obj, prop, val)
     } else {
         throw new Error('无法操作该对象')
     }
+}
+
+// 延迟设置css属性
+const cssDomDelay = (obj, prop, val) => {
+    setTimeout(() => {
+        css(obj, prop, val)
+    }, 10)
 }
 
 // 获取ref的css样式
@@ -55,7 +62,7 @@ const getCssDom = (dom, prop) => {
 
 // 获取css样式
 const getCss = (obj, prop) => {
-    if (obj instanceof HTMLElement) {
+    if (obj instanceof Element) {
         getCssDom(obj, prop)
     } else if (obj.__v_isRef === true) {
         getCssRef(obj, prop)
@@ -76,7 +83,7 @@ const setAttrRef = (ref, prop, val) => {
 
 // 设置属性
 const setAttr = (obj, prop, val) => {
-    if (obj instanceof HTMLElement) {
+    if (obj instanceof Element) {
         setAttrDom(obj, prop, val)
     } else if (obj.__v_isRef === true) {
         setAttrRef(obj, prop, val)
@@ -92,13 +99,6 @@ const setStyle = (obj, style) => {
         value += `${attr}: ${style[attr]}; `
     }
     setAttr(obj, 'style', value)
-}
-
-// 监听样式
-const cssListener = (obj, prop) => {
-    return setInterval(() => {
-
-    }, 200)
 }
 
 // 样式监听器
@@ -180,7 +180,7 @@ class RateCtrl {
 export default {
     RateCtrl, CssListener,
     refToDom,
-    cssDom, cssRef, css,
+    cssDom, cssRef, css, cssDomDelay,
     getDomRect, getRefRect, getRect,
     getCssRef, getCssDom, getCss,
     setAttrDom, setAttrRef, setAttr, setStyle,

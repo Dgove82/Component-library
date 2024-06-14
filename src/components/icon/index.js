@@ -1,5 +1,8 @@
 import WeatherShower from "@/components/icon/modules/weatherShower.vue"
 import WeatherSnow from "@/components/icon/modules/weatherSnow.vue";
-import Image from "@/components/icon/modules/image.vue";
+import ImageIcon from "@/components/icon/modules/imageIcon.vue";
+import CloseIcon from "@/components/icon/modules/closeIcon.vue";
+import AddIcon from "@/components/icon/modules/addIcon.vue";
+import RemoveIcon from "@/components/icon/modules/removeIcon.vue";
 
-export { WeatherShower, WeatherSnow, Image }
+export { WeatherShower, WeatherSnow, ImageIcon, CloseIcon, AddIcon, RemoveIcon }

@@ -1,9 +1,10 @@
 <script setup>
-import {WeatherSnow} from "@/components/icon/index.js";
-import {IconBox, LoadBox, PopOverBox, VariableBox} from "@/components/box/index.js";
+import {ImageIcon} from "@/components/icon/index.js";
+import {DialogBox, IconBox, ImageBox, LoadBox, PopOverBox, RadiusBox} from "@/components/box/index.js";
 import {NormalButton} from "@/components/button/index.js";
+import {ImageLoader} from "@/components/loader/index.js";
 import {onMounted, ref} from "vue";
-import ImageBox from "@/components/box/modules/imageBox.vue";
+
 
 
 const popover = ref(null)
@@ -15,17 +16,26 @@ const props = defineProps({
   }
 })
 
+const radBox = ref(null)
+const dialog = ref(null)
+
+onMounted(() => {
+
+})
+
 
 </script>
 
 <template>
   <div v-if="t_id === 0">
-    <div style="height: 1000px;"></div>
     <div class="title">
       可变盒
     </div>
-    <div class="mBox">
-      <VariableBox></VariableBox>
+    <div class="mBox" style="margin-bottom: 50px;">
+      <radius-box ref="radBox"></radius-box>
+    </div>
+    {{radBox?.radiusStyle}}
+    <div>
     </div>
   </div>
   <div v-if="t_id === 1">
@@ -33,8 +43,8 @@ const props = defineProps({
       图标
     </div>
     <div class="sBox">
-      <IconBox listen="true">
-        <WeatherSnow></WeatherSnow>
+      <IconBox watch="true" stroke="yellow">
+        <image-icon></image-icon>
       </IconBox>
     </div>
   </div>
@@ -53,7 +63,7 @@ const props = defineProps({
     <div class="sBox">
       <div class="box"
            style="width: 90px; margin: 50px auto; position: relative;">
-        <pop-over-box width="100px" trigger="click" direction="upon" theme="light" ref="popover">
+        <pop-over-box width="600px" trigger="click" direction="upon" theme="light" ref="popover">
           <template #trigger>
             <button style="width: 100px;">上</button>
           </template>
@@ -106,8 +116,17 @@ const props = defineProps({
   <div v-if="t_id === 5">
     <div class="title">加载盒展示</div>
     <div class="sBox">
-      <load-box ref="load" listen="true"></load-box>
+      <load-box ref="load" watch="true">
+        <image-loader></image-loader>
+      </load-box>
     </div>
+  </div>
+  <div v-if="t_id === 6">
+    <div class="sBox">
+      <button @click="dialog.openDialog">打开</button>
+    </div>
+    <DialogBox ref="dialog"></DialogBox>
+    <div style="height: 10000px"></div>
   </div>
 </template>
 
@@ -119,7 +138,6 @@ const props = defineProps({
 }
 
 .sBox {
-  color: red;
   position: relative;
   width: 300px;
   height: 300px;

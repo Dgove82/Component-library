@@ -4,7 +4,7 @@ import {tool} from "@/utils/index.js";
 import RotatingPoint from "@/components/loader/modules/rotatingPoint.vue";
 
 const props = defineProps({
-  listen: {
+  watch: {
     type: String,
     default: 'false'
   }
@@ -17,8 +17,8 @@ const loadBox = ref(null)
 const wrapper = ref(null)
 
 class LoadBox {
-  constructor(listen) {
-    this.listen = listen
+  constructor(config = {listen: 'false'}) {
+    this.listen = config.listen
     this.loadBox = tool.refToDom(loadBox)
     this.wrapper = tool.refToDom(wrapper)
 
@@ -30,7 +30,7 @@ class LoadBox {
 
   init() {
     this.adjust_wrapper()
-    if(this.listen === 'true') this.add_event()
+    if (this.listen === 'true') this.add_event()
   }
 
   adjust_wrapper = () => {
@@ -67,15 +67,15 @@ defineExpose({
 })
 
 const createBox = () => {
-  return new LoadBox(props.listen)
+  return new LoadBox({listen: props.watch})
 }
 
 onMounted(() => {
   box = createBox()
 })
 
-onUnmounted(()=>{
-  if (props.listen === 'true') box.cssListener.clear_listener()
+onUnmounted(() => {
+  if (props.watch === 'true') box.cssListener.clear_listener()
 })
 </script>
 
@@ -96,7 +96,6 @@ onUnmounted(()=>{
   left: 0;
   width: 100%;
   height: 100%;
-  border: 1px black solid;
 }
 
 .loadBox .wrapper {

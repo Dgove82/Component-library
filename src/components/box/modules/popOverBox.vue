@@ -63,6 +63,7 @@ class Popover {
     this.controllerRect = null
     this.popBoxRect = null
     this.arrowRect = null
+    this.padding = 5
 
     this.appearRateCtrl = new tool.RateCtrl()
     this.disappearRateCtrl = new tool.RateCtrl()
@@ -128,31 +129,43 @@ class Popover {
   }
 
   fineTuning = () => {
+    // popBox距离右边框距离
     const distanceRight = (this.popBoxRect.width - this.controllerRect.width) / 2
+    // 距离右边框距离
     const right = window.innerWidth - this.controllerRect.right - this.scrollBar
+    // popBox距离底部距离
     const distanceBottom = (this.popBoxRect.height - this.controllerRect.height) / 2
+    // 距离底部框距离
     const bottom = window.innerHeight - this.controllerRect.bottom
 
+
     if (['upon', 'down'].includes(this.distance.direction)) {
-      if (this.distance.leftP > this.controllerRect.left && this.controllerRect.left > 0) {
-        this.distance.leftP = this.controllerRect.left
+      if (this.distance.leftP - this.padding > this.controllerRect.left && this.controllerRect.left > 0) {
+        // 左侧遮蔽，向右偏移
+        this.distance.leftP = this.controllerRect.left + this.padding
       } else if (this.controllerRect.left <= 0) {
-        this.distance.leftP = 0
-      } else if (distanceRight > right && right > 0) {
-        this.distance.leftP += distanceRight - right
+        // 控制器左侧遮蔽，popBox与控制器同左
+        this.distance.leftP = this.padding
+      } else if (distanceRight -this.padding > right && right > 0) {
+        // 右侧遮蔽，向左偏移
+        this.distance.leftP += distanceRight - right -this.padding
       } else if (right <= 0) {
-        this.distance.leftP += distanceRight
+        this.distance.leftP += distanceRight - this.padding
       }
 
     } else if (['left', 'right'].includes(this.distance.direction)) {
-      if (this.distance.topP > this.controllerRect.top && this.controllerRect.top > 0) {
-        this.distance.topP = this.controllerRect.top
+      if (this.distance.topP - this.padding > this.controllerRect.top && this.controllerRect.top > 0) {
+        // 顶层遮蔽，向下偏移
+        this.distance.topP = this.controllerRect.top + this.padding
       } else if (this.controllerRect.top <= 0) {
-        this.distance.topP = 0
+        // 控制器顶层遮蔽，popBox与控制器同高
+        this.distance.topP = this.padding
       } else if (distanceBottom > bottom && bottom > 0) {
-        this.distance.topP += distanceBottom - bottom
+        // 底部遮蔽，向上偏移
+        this.distance.topP += distanceBottom - bottom - this.padding
       } else if (bottom <= 0) {
-        this.distance.topP += distanceBottom
+        // 控制器底部遮蔽，popBox与控制器同底
+        this.distance.topP += distanceBottom - this.padding
       }
 
     }
@@ -579,6 +592,7 @@ defineExpose({
   border: 1px solid var(--border-color);
   background-color: var(--background-color);
   color: var(--font-color);
+  box-shadow: 0 0 12px rgba(0, 0, 0, .12);
 }
 
 .popBox .arrow {

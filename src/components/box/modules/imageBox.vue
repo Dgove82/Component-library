@@ -2,8 +2,8 @@
 import {onMounted, ref, watch} from "vue"
 import {tool} from '@/utils'
 import {IconBox, LoadBox} from "@/components/box/index.js";
-import {Image} from "@/components/icon/index.js";
-import RotatingPoint from "@/components/loader/modules/rotatingPoint.vue";
+import ImageLoader from "@/components/loader/modules/imageLoader.vue";
+import {ImageIcon} from "@/components/icon/index.js";
 
 const props = defineProps({
   image: {
@@ -19,8 +19,8 @@ const empty = ref(null)
 const load = ref(null)
 
 class ImageBox {
-  constructor(config = {image: null}) {
-    this.src = config.image
+  constructor(imageSrc) {
+    this.src = imageSrc
 
     this.image = tool.refToDom(image)
     this.empty = tool.refToDom(empty)
@@ -35,23 +35,25 @@ class ImageBox {
   }
 
   init_style(state) {
-    switch (state) {
-      case 'no':
-        tool.cssDom(this.image, 'opacity', 0)
-        tool.cssDom(this.empty, 'opacity', 1)
-        tool.cssDom(this.load, 'opacity', 0)
-        break
-      case 'load':
-        tool.cssDom(this.image, 'opacity', 0)
-        tool.cssDom(this.empty, 'opacity', 0)
-        tool.cssDom(this.load, 'opacity', 1)
-        break
-      case 'ok':
-        tool.cssDom(this.image, 'opacity', 1)
-        tool.cssDom(this.empty, 'opacity', 0)
-        tool.cssDom(this.load, 'opacity', 0)
-        break
-    }
+    setTimeout(() => {
+      switch (state) {
+        case 'no':
+          tool.cssDom(this.image, 'opacity', 0)
+          tool.cssDom(this.empty, 'opacity', 1)
+          tool.cssDom(this.load, 'opacity', 0)
+          break
+        case 'load':
+          tool.cssDom(this.image, 'opacity', 0)
+          tool.cssDom(this.empty, 'opacity', 0)
+          tool.cssDom(this.load, 'opacity', 1)
+          break
+        case 'ok':
+          tool.cssDom(this.image, 'opacity', 1)
+          tool.cssDom(this.empty, 'opacity', 0)
+          tool.cssDom(this.load, 'opacity', 0)
+          break
+      }
+    }, 10)
   }
 
   check_src() {
@@ -65,22 +67,18 @@ class ImageBox {
   }
 
   load_error = () => {
-    tool.cssDom(this.load, 'transition', 'opacity 3s')
-    tool.cssDom(this.empty, 'transition', 'opacity 3s')
+    tool.cssDom(this.empty, 'display', 'block')
     this.init_style('no')
     setTimeout(() => {
-      tool.cssDom(this.load, 'transition', 'none')
-      tool.cssDom(this.empty, 'transition', 'none')
+      tool.cssDom(this.load, 'display', 'none')
     }, 3000)
   }
 
   load_success = () => {
-    tool.cssDom(this.load, 'transition', 'opacity 3s')
-    tool.cssDom(this.image, 'transition', 'opacity 3s')
+    tool.cssDom(this.image, 'display', 'block')
     this.init_style('ok')
     setTimeout(() => {
-      tool.cssDom(this.load, 'transition', 'none')
-      tool.cssDom(this.image, 'transition', 'none')
+      tool.cssDom(this.load, 'display', 'none')
     }, 3000)
 
   }
@@ -92,7 +90,7 @@ class ImageBox {
 }
 
 const createImageBox = () => {
-  return new ImageBox({image: props.image})
+  return new ImageBox(props.image)
 }
 
 watch(() => props, () => {
@@ -112,15 +110,18 @@ onMounted(() => {
       <slot name="empty">
         <div class="emptyBox">
           <icon-box>
-            <Image></Image>
+            <image-icon></image-icon>
           </icon-box>
+          <div class="tip">
+            加载失败
+          </div>
         </div>
       </slot>
     </div>
     <div ref="load" class="load">
       <slot name="load">
         <load-box>
-          <rotating-point></rotating-point>
+          <image-loader></image-loader>
         </load-box>
       </slot>
     </div>
@@ -140,6 +141,8 @@ onMounted(() => {
   top: 0;
   left: 0;
   opacity: 0;
+  display: none;
+  transition: opacity 3s;
 }
 
 .showBox .null {
@@ -149,6 +152,8 @@ onMounted(() => {
   top: 0;
   left: 0;
   opacity: 0;
+  display: none;
+  transition: opacity 6s;
 }
 
 .showBox .null .emptyBox {
@@ -157,7 +162,10 @@ onMounted(() => {
   position: relative;
   top: calc((100% - 30%) / 2);
   left: calc((100% - 30%) / 2);
-  color: red;
+}
+
+.showBox .null .emptyBox .tip {
+  text-align: center;
 }
 
 .showBox .load {
@@ -166,6 +174,7 @@ onMounted(() => {
   position: absolute;
   top: 0;
   left: 0;
-  opacity: 0;
+  opacity: 1;
+  transition: opacity 3s;
 }
 </style>

@@ -2,7 +2,7 @@
 import {computed, ref} from "vue";
 import Test from "@/components/test.vue";
 
-const t_id = ref('5');
+const t_id = ref('6');
 
 const tid = computed(()=> {
   try{
